@@ -1,9 +1,12 @@
 import * as cdk from '@aws-cdk/core';
 import * as s3 from '@aws-cdk/aws-s3';
 import * as cloudfront from '@aws-cdk/aws-cloudfront';
+import * as cwt from 'cdk-webapp-tools';
 
 interface WebAppProps {
   hostingBucket: s3.IBucket;
+  baseDirectory: string;
+  relativeWebAppPath: string;
 }
 
 export class WebApp extends cdk.Construct {
@@ -47,5 +50,20 @@ export class WebApp extends cdk.Construct {
     );
 
     props.hostingBucket.grantRead(oai);
+
+    new cwt.WebAppDeployment(this, 'WebAppDeploy', {
+      bucket: props.hostingBucket,
+      buildCommand: 'yarn build',
+      buildDirectory: 'build',
+      baseDirectory: props.baseDirectory,
+      relativeWebAppPath: props.relativeWebAppPath,
+      webDistribution: this.webDistribution,
+      webDistributionPaths: ['/*'],
+      prune: true,
+    });
+
+    new cdk.CfnOutput(this, 'URL', {
+      value: `https://${this.webDistribution.distributionDomainName}/`,
+    });
   }
 }

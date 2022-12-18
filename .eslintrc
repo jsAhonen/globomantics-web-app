@@ -3,5 +3,6 @@
   "parser": "@babel/eslint-parser",
   "parserOptions": {
     "requireConfigFile": false
-  }
+  },
+  "indent": ["error", 2]
 }
